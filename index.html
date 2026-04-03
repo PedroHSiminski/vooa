@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vooa — Passagens inteligentes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     LOGIN
+══════════════════════════════ -->
+<div class="page" id="page-login">
+  <div class="auth-wrap">
+    <div class="auth-visual">
+      <div class="visual-grid"></div>
+      <div class="float-cards">
+        <div class="float-card c1"><div class="fc-route">GRU → LIS</div><div class="fc-price">R$ 2.890</div><div class="fc-site">Latam</div></div>
+        <div class="float-card c2"><div class="fc-route">POA → GRU</div><div class="fc-price">R$ 380</div><div class="fc-site">Gol</div></div>
+        <div class="float-card c3"><div class="fc-route">GRU → MIA</div><div class="fc-price">R$ 3.540</div><div class="fc-site">Decolar</div></div>
+      </div>
+
+      <!-- Mascote piloto -->
+      <div class="mascot-wrap">
+        <svg class="mascot" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Corpo do piloto -->
+          <ellipse cx="100" cy="155" rx="38" ry="48" fill="#1e4976"/>
+          <!-- Pescoço -->
+          <rect x="88" y="108" width="24" height="18" rx="6" fill="#f5c5a3"/>
+          <!-- Cabeça -->
+          <ellipse cx="100" cy="90" rx="32" ry="34" fill="#f5c5a3"/>
+          <!-- Orelhas -->
+          <ellipse cx="68" cy="90" rx="7" ry="9" fill="#f0b990"/>
+          <ellipse cx="132" cy="90" rx="7" ry="9" fill="#f0b990"/>
+          <!-- Capacete / quepe -->
+          <ellipse cx="100" cy="68" rx="33" ry="14" fill="#1a3a5c"/>
+          <rect x="67" y="62" width="66" height="14" rx="4" fill="#1a3a5c"/>
+          <!-- Aba do quepe -->
+          <ellipse cx="100" cy="76" rx="36" ry="6" fill="#122e4a"/>
+          <!-- Emblema quepe -->
+          <circle cx="100" cy="65" r="6" fill="#c8502a"/>
+          <text x="100" y="69" text-anchor="middle" font-size="7" font-weight="bold" fill="#fff">✈</text>
+          <!-- Olhos -->
+          <ellipse cx="88" cy="91" rx="7" ry="7.5" fill="#fff"/>
+          <ellipse cx="112" cy="91" rx="7" ry="7.5" fill="#fff"/>
+          <circle cx="89" cy="92" r="4" fill="#2c3e50"/>
+          <circle cx="113" cy="92" r="4" fill="#2c3e50"/>
+          <circle cx="90" cy="90" r="1.5" fill="#fff"/>
+          <circle cx="114" cy="90" r="1.5" fill="#fff"/>
+          <!-- Sobrancelhas -->
+          <path d="M81 83 Q88 80 95 83" stroke="#8B6914" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M105 83 Q112 80 119 83" stroke="#8B6914" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Nariz -->
+          <ellipse cx="100" cy="99" rx="4" ry="3" fill="#e8a882"/>
+          <!-- Boca / sorriso -->
+          <path d="M89 108 Q100 116 111 108" stroke="#c8693a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- Uniforme - detalhes -->
+          <rect x="86" y="123" width="28" height="4" rx="2" fill="#c8502a"/>
+          <!-- Braço esquerdo -->
+          <ellipse cx="62" cy="155" rx="12" ry="28" fill="#1e4976" transform="rotate(-15 62 155)"/>
+          <!-- Braço direito -->
+          <ellipse cx="138" cy="155" rx="12" ry="28" fill="#1e4976" transform="rotate(15 138 155)"/>
+          <!-- Mão esquerda com polegar pra cima -->
+          <ellipse cx="52" cy="178" rx="10" ry="8" fill="#f5c5a3" transform="rotate(-15 52 178)"/>
+          <rect x="44" y="168" width="7" height="12" rx="3.5" fill="#f5c5a3" transform="rotate(-30 44 168)"/>
+          <!-- Mão direita acenando -->
+          <ellipse cx="148" cy="178" rx="10" ry="8" fill="#f5c5a3" transform="rotate(15 148 178)"/>
+          <!-- Listras de patente no braço -->
+          <rect x="57" y="148" width="16" height="3" rx="1" fill="#c8a228" transform="rotate(-15 57 148)"/>
+          <rect x="57" y="153" width="16" height="3" rx="1" fill="#c8a228" transform="rotate(-15 57 153)"/>
+          <!-- Gravata / lenço -->
+          <path d="M96 123 L100 138 L104 123" fill="#c8502a"/>
+        </svg>
+      </div>
+
+      <div class="auth-visual-content">
+        <div class="auth-logo-big">Vooa</div>
+        <p class="auth-tagline">Encontre as melhores passagens com ajuda de IA — sempre com a fonte de onde cada preço veio.</p>
+      </div>
+    </div>
+
+    <div class="auth-form-panel">
+      <div class="auth-box">
+        <span class="auth-logo-small">Vooa</span>
+        <h1 class="auth-title">Bem-vindo de volta</h1>
+        <p class="auth-sub">Entre para buscar passagens com IA</p>
+        <div class="msg-error" id="login-error"></div>
+        <label for="login-email">E-mail</label>
+        <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email" />
+        <label for="login-pass">Senha</label>
+        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" />
+        <button class="btn btn-primary" id="btn-login">Entrar</button>
+        <p class="auth-link"><a onclick="showPage('page-recover')">Esqueci minha senha</a></p>
+        <p class="auth-link">Não tem conta? <a onclick="showPage('page-register')">Criar conta</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     REGISTRO
+══════════════════════════════ -->
+<div class="page" id="page-register">
+  <div class="auth-wrap">
+    <div class="auth-visual">
+      <div class="visual-grid"></div>
+      <div class="mascot-wrap">
+        <svg class="mascot" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="155" rx="38" ry="48" fill="#1e4976"/>
+          <rect x="88" y="108" width="24" height="18" rx="6" fill="#f5c5a3"/>
+          <ellipse cx="100" cy="90" rx="32" ry="34" fill="#f5c5a3"/>
+          <ellipse cx="68" cy="90" rx="7" ry="9" fill="#f0b990"/>
+          <ellipse cx="132" cy="90" rx="7" ry="9" fill="#f0b990"/>
+          <ellipse cx="100" cy="68" rx="33" ry="14" fill="#1a3a5c"/>
+          <rect x="67" y="62" width="66" height="14" rx="4" fill="#1a3a5c"/>
+          <ellipse cx="100" cy="76" rx="36" ry="6" fill="#122e4a"/>
+          <circle cx="100" cy="65" r="6" fill="#c8502a"/>
+          <text x="100" y="69" text-anchor="middle" font-size="7" font-weight="bold" fill="#fff">✈</text>
+          <ellipse cx="88" cy="91" rx="7" ry="7.5" fill="#fff"/>
+          <ellipse cx="112" cy="91" rx="7" ry="7.5" fill="#fff"/>
+          <circle cx="89" cy="92" r="4" fill="#2c3e50"/>
+          <circle cx="113" cy="92" r="4" fill="#2c3e50"/>
+          <circle cx="90" cy="90" r="1.5" fill="#fff"/>
+          <circle cx="114" cy="90" r="1.5" fill="#fff"/>
+          <path d="M81 83 Q88 80 95 83" stroke="#8B6914" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M105 83 Q112 80 119 83" stroke="#8B6914" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <ellipse cx="100" cy="99" rx="4" ry="3" fill="#e8a882"/>
+          <path d="M89 108 Q100 116 111 108" stroke="#c8693a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <rect x="86" y="123" width="28" height="4" rx="2" fill="#c8502a"/>
+          <ellipse cx="62" cy="155" rx="12" ry="28" fill="#1e4976" transform="rotate(-15 62 155)"/>
+          <ellipse cx="138" cy="155" rx="12" ry="28" fill="#1e4976" transform="rotate(15 138 155)"/>
+          <ellipse cx="52" cy="178" rx="10" ry="8" fill="#f5c5a3" transform="rotate(-15 52 178)"/>
+          <rect x="44" y="168" width="7" height="12" rx="3.5" fill="#f5c5a3" transform="rotate(-30 44 168)"/>
+          <ellipse cx="148" cy="178" rx="10" ry="8" fill="#f5c5a3" transform="rotate(15 148 178)"/>
+          <rect x="57" y="148" width="16" height="3" rx="1" fill="#c8a228" transform="rotate(-15 57 148)"/>
+          <rect x="57" y="153" width="16" height="3" rx="1" fill="#c8a228" transform="rotate(-15 57 153)"/>
+          <path d="M96 123 L100 138 L104 123" fill="#c8502a"/>
+        </svg>
+      </div>
+      <div class="auth-visual-content">
+        <div class="auth-logo-big">Vooa</div>
+        <p class="auth-tagline">Passagens mais baratas em segundos, com fontes claras e links diretos para compra.</p>
+      </div>
+    </div>
+    <div class="auth-form-panel">
+      <div class="auth-box">
+        <span class="auth-logo-small">Vooa</span>
+        <h1 class="auth-title">Criar conta</h1>
+        <p class="auth-sub">Comece a buscar passagens agora</p>
+        <div class="msg-error" id="reg-error"></div>
+        <div class="msg-success" id="reg-success"></div>
+        <label for="reg-name">Seu nome</label>
+        <input type="text" id="reg-name" placeholder="João Silva" autocomplete="name" />
+        <label for="reg-email">E-mail</label>
+        <input type="email" id="reg-email" placeholder="seu@email.com" autocomplete="email" />
+        <label for="reg-pass">Senha</label>
+        <input type="password" id="reg-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+        <button class="btn btn-primary" id="btn-register">Criar conta</button>
+        <p class="auth-link">Já tem conta? <a onclick="showPage('page-login')">Entrar</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     RECUPERAR SENHA
+══════════════════════════════ -->
+<div class="page" id="page-recover">
+  <div class="auth-wrap">
+    <div class="auth-visual">
+      <div class="visual-grid"></div>
+      <div class="auth-visual-content">
+        <div class="auth-logo-big">Vooa</div>
+        <p class="auth-tagline">Vamos recuperar seu acesso rapidinho.</p>
+      </div>
+    </div>
+    <div class="auth-form-panel">
+      <div class="auth-box">
+        <span class="auth-logo-small">Vooa</span>
+        <h1 class="auth-title">Recuperar senha</h1>
+        <p class="auth-sub">Informe seu e-mail cadastrado</p>
+        <div class="msg-error" id="rec-error"></div>
+        <div class="msg-success" id="rec-success"></div>
+        <label for="rec-email">E-mail cadastrado</label>
+        <input type="email" id="rec-email" placeholder="seu@email.com" />
+        <button class="btn btn-primary" id="btn-recover">Enviar link de recuperação</button>
+        <p class="auth-link"><a onclick="showPage('page-login')">← Voltar para o login</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     APP PRINCIPAL
+══════════════════════════════ -->
+<div class="page" id="page-app">
+
+  <header class="app-header">
+    <div class="header-logo">Vooa</div>
+    <div class="header-user">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <span class="user-name user-name-link" id="user-name-display" onclick="showHistoryPage()">—</span>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <div class="search-hero">
+    <div class="search-hero-inner">
+      <h1 id="hero-greeting">Vooa!</h1>
+      <p>Busco passagens e hospedagem em tempo real — com a fonte de cada preço</p>
+
+      <div class="search-card">
+        <div class="search-field">
+          <label for="s-origem">Origem</label>
+          <input type="text" id="s-origem" placeholder="Porto Alegre" />
+        </div>
+        <div class="search-field">
+          <label for="s-destino">Destino</label>
+          <input type="text" id="s-destino" placeholder="Lisboa" />
+        </div>
+        <div class="search-field">
+          <label for="s-ida">Ida</label>
+          <input type="date" id="s-ida" />
+        </div>
+        <div class="search-field">
+          <label for="s-volta">Volta</label>
+          <input type="date" id="s-volta" />
+        </div>
+        <button class="btn-search" id="btn-buscar" onclick="buscarPassagens()">Buscar →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="results-area">
+    <div class="api-notice" id="api-notice">
+      ⚙️ <strong>Configure sua chave Gemini</strong> para ativar buscas reais.
+      Abra <code>app.js</code>, localize <code>GEMINI_API_KEY</code> e insira sua chave de
+      <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a>.
+    </div>
+
+    <!-- Erro de validação inline -->
+    <div class="search-error" id="search-error"></div>
+
+    <div class="empty-state" id="empty-state">
+      <span class="icon">✈</span>
+      <h3>Pronto para decolar</h3>
+      <p>Preencha origem, destino e datas acima para encontrar as melhores passagens</p>
+    </div>
+
+    <div class="loading-wrap" id="loading-wrap">
+      <div class="spinner"></div>
+      <div class="loading-steps">
+        <div class="loading-step">Consultando preços de passagens...</div>
+        <div class="loading-step">Verificando hospedagem disponível...</div>
+        <div class="loading-step">Comparando fontes e sites...</div>
+        <div class="loading-step">Montando análise de custo-benefício...</div>
+      </div>
+    </div>
+
+    <div id="results-container" style="display:none">
+      <div id="analysis-box" class="analysis-box"></div>
+      <div id="results-grid" class="results-grid"></div>
+      <p class="disclaimer">
+        Preços encontrados via busca em tempo real. Valores podem variar ao acessar o site.<br>
+        Sempre confirme o preço final antes de concluir a compra.
+      </p>
+    </div>
+
+    <div class="history-section" id="history-section" style="display:none">
+      <h3 class="history-title">Buscas recentes</h3>
+      <div class="history-list" id="history-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PÁGINA DE HISTÓRICO
+══════════════════════════════ -->
+<div class="page" id="page-history">
+
+  <header class="app-header">
+    <div class="header-logo">Vooa</div>
+    <div class="header-user">
+      <div class="user-avatar" id="user-avatar-h">?</div>
+      <span class="user-name" id="user-name-h">—</span>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <div class="history-page-hero">
+    <div class="history-page-inner">
+      <button class="btn-back" onclick="showPage('page-app')">← Voltar</button>
+      <h1 id="history-page-title" class="history-page-heading">Suas viagens</h1>
+      <p class="history-page-sub">Clique em qualquer busca para repetir com os dados de hoje</p>
+    </div>
+  </div>
+
+  <div class="history-page-body">
+    <div class="history-page-empty" id="history-page-empty" style="display:none">
+      <div class="empty-state">
+        <span class="icon">🗺</span>
+        <h3>Nenhuma busca ainda</h3>
+        <p>Suas buscas de passagens aparecerão aqui</p>
+      </div>
+      <div style="text-align:center;margin-top:1.5rem">
+        <button class="btn btn-primary" style="width:auto;padding:.75rem 2rem" onclick="showPage('page-app')">Fazer minha primeira busca</button>
+      </div>
+    </div>
+    <div id="history-page-list" class="hpage-list"></div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+
+<script>
+// Sincroniza avatar/nome na página de histórico
+const _origLogin = loginSuccess;
+window.loginSuccess = function(email, name) {
+  _origLogin(email, name);
+  const av = document.getElementById('user-avatar-h');
+  const nm = document.getElementById('user-name-h');
+  if (av) av.textContent = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  if (nm) nm.textContent = name;
+};
+</script>
+</body>
+</html>
