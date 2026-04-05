@@ -1,20 +1,16 @@
 // ════════════════════════════════
-// AUTH — localStorage
+// SUPABASE CONFIG
+// ════════════════════════════════
+const SUPABASE_URL  = 'https://brpwyffpqipleayknlyb.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJycHd5ZmZwcWlwbGVheWtubHliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDc2OTAsImV4cCI6MjA5MDk4MzY5MH0.Xtma_-jTimHTcU6SZkvhdP4GkaC9oDAWRXEqAhHAgek';
+
+// Cliente Supabase (via CDN carregado no HTML)
+let sb;
+
+// ════════════════════════════════
+// ESTADO
 // ════════════════════════════════
 let currentUser = null;
-
-function getUsers() {
-  try { return JSON.parse(localStorage.getItem('vooa_users') || '{}'); }
-  catch(e) { return {}; }
-}
-function saveUsers(u) { localStorage.setItem('vooa_users', JSON.stringify(u)); }
-function getHistory(email) {
-  try { return JSON.parse(localStorage.getItem('vooa_hist_' + email) || '[]'); }
-  catch(e) { return []; }
-}
-function saveHistory(email, h) {
-  localStorage.setItem('vooa_hist_' + email, JSON.stringify(h.slice(0, 20)));
-}
 
 // ════════════════════════════════
 // NAVEGAÇÃO
@@ -32,7 +28,7 @@ function showError(id, msg) {
   el.textContent = msg;
   el.classList.add('show');
 }
-function hideError(id) {
+function hideMsg(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('show');
 }
@@ -46,74 +42,122 @@ function showSuccess(id, msg) {
 // ════════════════════════════════
 // LOGIN
 // ════════════════════════════════
-function handleLogin() {
+async function handleLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass  = document.getElementById('login-pass').value;
-  hideError('login-error');
+  hideMsg('login-error');
 
   if (!email || !pass) { showError('login-error', 'Preencha e-mail e senha.'); return; }
 
-  const users = getUsers();
-  if (!users[email]) { showError('login-error', 'E-mail não cadastrado. Crie uma conta primeiro.'); return; }
-  if (users[email].pass !== btoa(unescape(encodeURIComponent(pass)))) {
-    showError('login-error', 'Senha incorreta. Tente novamente.'); return;
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true;
+  btn.textContent = 'Entrando...';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+
+  btn.disabled = false;
+  btn.textContent = 'Entrar';
+
+  if (error) {
+    const msg = error.message.includes('Invalid') ? 'E-mail ou senha incorretos.' : error.message;
+    showError('login-error', msg);
+    return;
   }
-  loginSuccess(email, users[email].name);
+
+  const name = data.user.user_metadata?.name || email.split('@')[0];
+  loginSuccess(data.user, name);
 }
 
 // ════════════════════════════════
 // REGISTRO
 // ════════════════════════════════
-function handleRegister() {
+async function handleRegister() {
   const name  = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim().toLowerCase();
   const pass  = document.getElementById('reg-pass').value;
-  hideError('reg-error'); hideError('reg-success');
+  hideMsg('reg-error'); hideMsg('reg-success');
 
   if (!name || !email || !pass) { showError('reg-error', 'Preencha todos os campos.'); return; }
   if (pass.length < 8) { showError('reg-error', 'A senha precisa ter ao menos 8 caracteres.'); return; }
   if (!/\S+@\S+\.\S+/.test(email)) { showError('reg-error', 'Informe um e-mail válido.'); return; }
 
-  const users = getUsers();
-  if (users[email]) { showError('reg-error', 'E-mail já cadastrado. Faça login.'); return; }
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true;
+  btn.textContent = 'Criando conta...';
 
-  users[email] = { name, pass: btoa(unescape(encodeURIComponent(pass))), createdAt: new Date().toISOString() };
-  saveUsers(users);
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password: pass,
+    options: { data: { name } }
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Criar conta';
+
+  if (error) { showError('reg-error', error.message); return; }
+
+  // Supabase pode exigir confirmação de e-mail
+  if (data.user && !data.session) {
+    showSuccess('reg-success', 'Conta criada! Verifique seu e-mail para confirmar o cadastro.');
+    return;
+  }
+
   showSuccess('reg-success', 'Conta criada com sucesso! Redirecionando...');
-  setTimeout(() => loginSuccess(email, name), 1200);
+  setTimeout(() => loginSuccess(data.user, name), 1200);
 }
 
 // ════════════════════════════════
-// RECUPERAÇÃO
+// RECUPERAÇÃO DE SENHA
 // ════════════════════════════════
-function handleRecover() {
+async function handleRecover() {
   const email = document.getElementById('rec-email').value.trim().toLowerCase();
-  hideError('rec-error'); hideError('rec-success');
-  if (!email || !/\S+@\S+\.\S+/.test(email)) { showError('rec-error', 'Informe um e-mail válido.'); return; }
-  showSuccess('rec-success', `Se ${email} estiver cadastrado, você receberá as instruções em breve.`);
+  hideMsg('rec-error'); hideMsg('rec-success');
+
+  if (!email || !/\S+@\S+\.\S+/.test(email)) {
+    showError('rec-error', 'Informe um e-mail válido.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-recover');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Enviar link de recuperação';
+
+  if (error) { showError('rec-error', error.message); return; }
+
+  showSuccess('rec-success', `Link de recuperação enviado para ${email}. Verifique sua caixa de entrada.`);
 }
 
 // ════════════════════════════════
 // SESSION
 // ════════════════════════════════
-function loginSuccess(email, name) {
-  currentUser = { email, name };
-  localStorage.setItem('vooa_session', JSON.stringify(currentUser));
+function loginSuccess(user, name) {
+  const displayName = name || user.user_metadata?.name || user.email.split('@')[0];
+  currentUser = { id: user.id, email: user.email, name: displayName };
 
-  const firstName = name.split(' ')[0];
-  const initials  = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const firstName = displayName.split(' ')[0];
+  const initials  = displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
   showPage('page-app');
 
-  // Header
-  const avatarEl    = document.getElementById('user-avatar');
-  const nameEl      = document.getElementById('user-name-display');
-  const greetingEl  = document.getElementById('hero-greeting');
-  if (avatarEl)   avatarEl.textContent   = initials;
-  if (nameEl)     nameEl.textContent     = name;
-  if (greetingEl) greetingEl.textContent = `Vooa, ${firstName}!`;
+  const avatarEl   = document.getElementById('user-avatar');
+  const nameEl     = document.getElementById('user-name-display');
+  const greetingEl = document.getElementById('hero-greeting');
+  const avatarH    = document.getElementById('user-avatar-h');
+  const nameH      = document.getElementById('user-name-h');
 
-  // API notice — chave fica no servidor, não exposta aqui
+  if (avatarEl)   avatarEl.textContent   = initials;
+  if (nameEl)     nameEl.textContent     = displayName;
+  if (greetingEl) greetingEl.textContent = `Vooa, ${firstName}!`;
+  if (avatarH)    avatarH.textContent    = initials;
+  if (nameH)      nameH.textContent      = displayName;
+
   const notice = document.getElementById('api-notice');
   if (notice) notice.style.display = 'none';
 
@@ -121,9 +165,9 @@ function loginSuccess(email, name) {
   loadHistory();
 }
 
-function logout() {
+async function logout() {
+  await sb.auth.signOut();
   currentUser = null;
-  localStorage.removeItem('vooa_session');
   showPage('page-login');
   const e = document.getElementById('login-email');
   const p = document.getElementById('login-pass');
@@ -143,6 +187,68 @@ function resetSearchUI() {
 }
 
 // ════════════════════════════════
+// HISTÓRICO — Supabase
+// ════════════════════════════════
+async function loadHistory() {
+  if (!currentUser) return;
+
+  const { data, error } = await sb
+    .from('historico')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) { console.error('Erro ao carregar histórico:', error); return; }
+
+  const section = document.getElementById('history-section');
+  const list    = document.getElementById('history-list');
+  if (!section || !list) return;
+
+  if (!data?.length) { section.style.display = 'none'; return; }
+
+  section.style.display = 'block';
+  list.innerHTML = data.slice(0, 5).map((item, i) => `
+    <div class="history-item" onclick="replaySearch(${i})" data-id="${item.id}"
+         data-origem="${item.origem}" data-destino="${item.destino}"
+         data-ida="${item.ida}" data-volta="${item.volta || ''}">
+      <div class="hi-left">
+        <span class="hi-route">${item.origem} → ${item.destino}</span>
+        <span class="hi-date">${formatDate(item.ida)}${item.volta ? ' · volta ' + formatDate(item.volta) : ''}</span>
+      </div>
+      <span class="hi-arrow">→</span>
+    </div>
+  `).join('');
+
+  // Guarda lista completa para página de histórico
+  window._historyData = data;
+}
+
+function replaySearch(i) {
+  const data = window._historyData;
+  if (!data?.[i]) return;
+  const item = data[i];
+  document.getElementById('s-origem').value  = item.origem;
+  document.getElementById('s-destino').value = item.destino;
+  document.getElementById('s-ida').value     = item.ida;
+  document.getElementById('s-volta').value   = item.volta || '';
+  buscarPassagens();
+}
+
+async function addToHistory(origem, destino, ida, volta) {
+  if (!currentUser) return;
+  const { error } = await sb.from('historico').insert({
+    user_id: currentUser.id,
+    origem,
+    destino,
+    ida,
+    volta: volta || null
+  });
+  if (error) console.error('Erro ao salvar histórico:', error);
+  else loadHistory();
+}
+
+// ════════════════════════════════
 // PÁGINA DE HISTÓRICO
 // ════════════════════════════════
 function showHistoryPage() {
@@ -152,50 +258,41 @@ function showHistoryPage() {
 }
 
 function renderHistoryPage() {
-  const history = getHistory(currentUser.email);
-  const list    = document.getElementById('history-page-list');
-  const empty   = document.getElementById('history-page-empty');
+  const data      = window._historyData || [];
+  const list      = document.getElementById('history-page-list');
+  const empty     = document.getElementById('history-page-empty');
+  const title     = document.getElementById('history-page-title');
   const firstName = currentUser.name.split(' ')[0];
 
-  // Título personalizado
-  const title = document.getElementById('history-page-title');
   if (title) title.textContent = `Viagens de ${firstName}`;
-
   if (!list) return;
 
-  if (!history.length) {
+  if (!data.length) {
     list.innerHTML = '';
     if (empty) empty.style.display = 'block';
     return;
   }
   if (empty) empty.style.display = 'none';
 
-  list.innerHTML = history.map((item, i) => `
+  list.innerHTML = data.map((item, i) => `
     <div class="hpage-card" onclick="replayFromHistory(${i})">
       <div class="hpage-icon">✈</div>
       <div class="hpage-info">
         <div class="hpage-route">${item.origem} → ${item.destino}</div>
         <div class="hpage-dates">
-          Ida: ${formatDate(item.ida)}
-          ${item.volta ? ' · Volta: ' + formatDate(item.volta) : ''}
+          Ida: ${formatDate(item.ida)}${item.volta ? ' · Volta: ' + formatDate(item.volta) : ''}
         </div>
-        <div class="hpage-when">Buscado em ${item.date}</div>
+        <div class="hpage-when">Buscado em ${new Date(item.created_at).toLocaleDateString('pt-BR')}</div>
       </div>
       <div class="hpage-action">Buscar novamente →</div>
     </div>
   `).join('');
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
-}
-
 function replayFromHistory(i) {
-  const history = getHistory(currentUser.email);
-  const item = history[i];
-  if (!item) return;
+  const data = window._historyData;
+  if (!data?.[i]) return;
+  const item = data[i];
   showPage('page-app');
   document.getElementById('s-origem').value  = item.origem;
   document.getElementById('s-destino').value = item.destino;
@@ -204,47 +301,10 @@ function replayFromHistory(i) {
   buscarPassagens();
 }
 
-// ════════════════════════════════
-// HISTÓRICO (mini lista no app)
-// ════════════════════════════════
-function loadHistory() {
-  if (!currentUser) return;
-  const history = getHistory(currentUser.email);
-  const section = document.getElementById('history-section');
-  const list    = document.getElementById('history-list');
-  if (!section || !list) return;
-
-  if (!history.length) { section.style.display = 'none'; return; }
-  section.style.display = 'block';
-  list.innerHTML = history.slice(0, 5).map((item, i) => `
-    <div class="history-item" onclick="replaySearch(${i})">
-      <div class="hi-left">
-        <span class="hi-route">${item.origem} → ${item.destino}</span>
-        <span class="hi-date">${formatDate(item.ida)}${item.volta ? ' · volta ' + formatDate(item.volta) : ''} · ${item.date}</span>
-      </div>
-      <span class="hi-arrow">→</span>
-    </div>
-  `).join('');
-}
-
-function replaySearch(i) {
-  const history = getHistory(currentUser.email);
-  const item = history[i];
-  if (!item) return;
-  document.getElementById('s-origem').value  = item.origem;
-  document.getElementById('s-destino').value = item.destino;
-  document.getElementById('s-ida').value     = item.ida;
-  document.getElementById('s-volta').value   = item.volta || '';
-  buscarPassagens();
-}
-
-function addToHistory(origem, destino, ida, volta) {
-  if (!currentUser) return;
-  const history = getHistory(currentUser.email);
-  if (history[0]?.origem === origem && history[0]?.destino === destino && history[0]?.ida === ida) return;
-  history.unshift({ origem, destino, ida, volta, date: new Date().toLocaleDateString('pt-BR') });
-  saveHistory(currentUser.email, history);
-  loadHistory();
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
 }
 
 // ════════════════════════════════
@@ -257,10 +317,8 @@ async function buscarPassagens() {
   const volta   = document.getElementById('s-volta').value;
   const errEl   = document.getElementById('search-error');
 
-  // Esconde erro anterior
   if (errEl) errEl.classList.remove('show');
 
-  // Validação visual — sem alert()
   if (!origem || !destino || !ida) {
     if (errEl) {
       errEl.textContent = 'Selecione uma Origem e Destino!';
@@ -275,11 +333,10 @@ async function buscarPassagens() {
   document.getElementById('loading-wrap').classList.add('show');
   document.getElementById('btn-buscar').disabled = true;
 
-  addToHistory(origem, destino, ida, volta);
+  await addToHistory(origem, destino, ida, volta);
 
   try {
     const prompt = buildPrompt(origem, destino, ida, volta);
-    // Chama o servidor Vercel — a chave Gemini nunca fica exposta no browser
     const response = await fetch('/api/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -436,28 +493,19 @@ function renderFallback(msg, origem, destino) {
   document.getElementById('results-container').style.display = 'block';
 }
 
-function renderDemo(origem, destino) {
-  renderResults({
-    analise: `Modo demonstração — ${origem} → ${destino}. Insira sua chave Gemini no arquivo app.js para ver preços reais em tempo real.`,
-    passagens: [
-      { site: 'Latam Airlines', url: 'https://www.latam.com', preco: 'R$ 2.890', descricao: 'Voo direto GRU–LIS, 10h20. Inclui bagagem despachada.', tipo: 'melhor', fonte: 'Demonstração' },
-      { site: 'Decolar', url: 'https://www.decolar.com', preco: 'R$ 3.120', descricao: '1 escala em GRU, total ~14h. Tap Air Portugal.', tipo: 'alternativa', fonte: 'Demonstração' }
-    ],
-    hospedagem: [
-      { site: 'Booking.com', url: 'https://www.booking.com', preco: 'R$ 380', descricao: 'Hotel no centro histórico. Avaliação 8.7/10.', fonte: 'Demonstração' }
-    ]
-  }, origem, destino);
-}
-
 // ════════════════════════════════
 // INIT
 // ════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Inicializa Supabase
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // Botões
   document.getElementById('btn-login')?.addEventListener('click', handleLogin);
   document.getElementById('btn-register')?.addEventListener('click', handleRegister);
   document.getElementById('btn-recover')?.addEventListener('click', handleRecover);
   document.getElementById('login-pass')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
-  document.getElementById('reg-pass')?.addEventListener('keydown',   e => { if (e.key === 'Enter') handleRegister(); });
+  document.getElementById('reg-pass')?.addEventListener('keydown',  e => { if (e.key === 'Enter') handleRegister(); });
 
   // Datas padrão
   const today = new Date();
@@ -469,16 +517,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (idaEl)   idaEl.value   = fmt(d30);
   if (voltaEl) voltaEl.value = fmt(d37);
 
-  // Restaura sessão
-  try {
-    const sess = localStorage.getItem('vooa_session');
-    if (sess) {
-      const u = JSON.parse(sess);
-      const users = getUsers();
-      if (users[u.email]) { loginSuccess(u.email, u.name); return; }
-      else localStorage.removeItem('vooa_session');
+  // Verifica sessão existente
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    const name = session.user.user_metadata?.name || session.user.email.split('@')[0];
+    loginSuccess(session.user, name);
+    return;
+  }
+
+  // Escuta mudanças de sessão (login/logout)
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      const name = session.user.user_metadata?.name || session.user.email.split('@')[0];
+      loginSuccess(session.user, name);
     }
-  } catch(e) { localStorage.removeItem('vooa_session'); }
+    if (event === 'SIGNED_OUT') {
+      showPage('page-login');
+    }
+  });
 
   showPage('page-login');
 });
