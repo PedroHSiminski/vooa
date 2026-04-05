@@ -1,9 +1,4 @@
 // ════════════════════════════════
-// Chave de API do Gemini
-// ════════════════════════════════
-const GEMINI_API_KEY = 'AIzaSyASgDa9W-XGPRW7mkCn6VhCD2-jRW5bxyw';
-
-// ════════════════════════════════
 // AUTH — localStorage
 // ════════════════════════════════
 let currentUser = null;
@@ -118,10 +113,9 @@ function loginSuccess(email, name) {
   if (nameEl)     nameEl.textContent     = name;
   if (greetingEl) greetingEl.textContent = `Vooa, ${firstName}!`;
 
-  // API notice
-  const hasKey  = GEMINI_API_KEY && GEMINI_API_KEY !== 'SUA_CHAVE_AQUI';
-  const notice  = document.getElementById('api-notice');
-  if (notice) notice.classList.toggle('show', !hasKey);
+  // API notice — chave fica no servidor, não exposta aqui
+  const notice = document.getElementById('api-notice');
+  if (notice) notice.style.display = 'none';
 
   resetSearchUI();
   loadHistory();
@@ -283,28 +277,18 @@ async function buscarPassagens() {
 
   addToHistory(origem, destino, ida, volta);
 
-  const hasKey = GEMINI_API_KEY && GEMINI_API_KEY !== 'SUA_CHAVE_AQUI';
-
-  if (!hasKey) {
-    await delay(3000);
-    renderDemo(origem, destino);
-    return;
-  }
-
   try {
     const prompt = buildPrompt(origem, destino, ida, volta);
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          tools: [{ google_search: {} }],
-          generationConfig: { temperature: 0.2 }
-        })
-      }
-    );
+    // Chama o servidor Vercel — a chave Gemini nunca fica exposta no browser
+    const response = await fetch('/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ google_search: {} }],
+        generationConfig: { temperature: 0.2 }
+      })
+    });
 
     const data = await response.json();
     if (data.error) { renderFallback('Erro na API: ' + data.error.message, origem, destino); return; }
