@@ -410,11 +410,123 @@ function parseResponse(text) {
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ════════════════════════════════
+// LINKS REAIS — gerados com os dados do usuário
+// ════════════════════════════════
+
+// Converte "Porto Alegre" → código IATA aproximado para buscas
+const IATA = {
+  'porto alegre': 'POA', 'são paulo': 'GRU', 'sao paulo': 'GRU',
+  'rio de janeiro': 'GIG', 'brasília': 'BSB', 'brasilia': 'BSB',
+  'salvador': 'SSA', 'fortaleza': 'FOR', 'recife': 'REC',
+  'manaus': 'MAO', 'belém': 'BEL', 'belem': 'BEL',
+  'curitiba': 'CWB', 'florianópolis': 'FLN', 'florianopolis': 'FLN',
+  'belo horizonte': 'CNF', 'goiânia': 'GYN', 'goiania': 'GYN',
+  'natal': 'NAT', 'maceió': 'MCZ', 'maceio': 'MCZ',
+  'vitória': 'VIX', 'vitoria': 'VIX', 'campo grande': 'CGR',
+  'cuiabá': 'CGB', 'cuiaba': 'CGB', 'teresina': 'THE',
+  'são luís': 'SLZ', 'sao luis': 'SLZ', 'macapá': 'MCP',
+  'boa vista': 'BVB', 'porto velho': 'PVH', 'palmas': 'PMW',
+  'rio branco': 'RBR', 'aracaju': 'AJU', 'joão pessoa': 'JPA',
+  // Internacional
+  'lisboa': 'LIS', 'london': 'LHR', 'londres': 'LHR',
+  'paris': 'CDG', 'madrid': 'MAD', 'roma': 'FCO', 'rome': 'FCO',
+  'miami': 'MIA', 'new york': 'JFK', 'nova york': 'JFK',
+  'boston': 'BOS', 'orlando': 'MCO', 'los angeles': 'LAX',
+  'cancún': 'CUN', 'cancun': 'CUN', 'buenos aires': 'EZE',
+  'santiago': 'SCL', 'bogotá': 'BOG', 'bogota': 'BOG',
+  'lima': 'LIM', 'amsterdam': 'AMS', 'frankfurt': 'FRA',
+  'dubai': 'DXB', 'tokyo': 'NRT', 'tóquio': 'NRT',
+  'bangkok': 'BKK', 'barcelona': 'BCN', 'milan': 'MXP',
+  'milão': 'MXP', 'toronto': 'YYZ', 'mexico city': 'MEX',
+  'cidade do méxico': 'MEX', 'chicago': 'ORD', 'miami beach': 'MIA'
+};
+
+function getIATA(cidade) {
+  return IATA[cidade.toLowerCase().trim()] || cidade.toUpperCase().slice(0, 3);
+}
+
+function gerarLinksReais(site, origem, destino, ida, volta) {
+  const orig = getIATA(origem);
+  const dest = getIATA(destino);
+  const idaFmt   = ida;   // yyyy-mm-dd
+  const voltaFmt  = volta || '';
+
+  // Data no formato dd/mm/yyyy para alguns sites
+  const fmtBR = d => { if (!d) return ''; const [y,m,dd] = d.split('-'); return `${dd}/${m}/${y}`; };
+
+  // Parâmetros encoded
+  const oEnc = encodeURIComponent(origem);
+  const dEnc = encodeURIComponent(destino);
+
+  const nome = site.toLowerCase();
+
+  if (nome.includes('google') || nome.includes('flights')) {
+    const tipo = volta ? 'r' : 'o';
+    let url = `https://www.google.com/travel/flights/search?tfs=CBwQAhoeEgoyMDI1LTAxLTAxagcIARIDUE9BcgcIARIDTElTQAFIAXABggELCP___________wGYAQI`;
+    // URL simplificada que sempre funciona
+    url = `https://www.google.com/travel/flights?q=Flights+from+${oEnc}+to+${dEnc}+on+${ida}`;
+    return url;
+  }
+
+  if (nome.includes('decolar')) {
+    if (volta) {
+      return `https://www.decolar.com/flights/${orig}/${dest}/${ida}/${voltaFmt}/1/0/0`;
+    }
+    return `https://www.decolar.com/flights/${orig}/${dest}/${ida}/1/0/0`;
+  }
+
+  if (nome.includes('latam')) {
+    return `https://www.latam.com/pt_br/apps/personas/booking?fecha1_${orig}_${dest}=${fmtBR(ida)}&fecha2_${dest}_${orig}=${fmtBR(voltaFmt)}&from=${orig}&to=${dest}&autype=null&adults=1&children=0&babies=0&trip=${volta ? 'RT' : 'OW'}`;
+  }
+
+  if (nome.includes('gol')) {
+    return `https://www.voegol.com.br/pt/passagens-aereas?from=${orig}&to=${dest}&departure=${ida}&return=${voltaFmt}&adults=1&children=0&infants=0&tripType=${volta ? 'roundtrip' : 'oneway'}`;
+  }
+
+  if (nome.includes('azul')) {
+    return `https://www.voeazul.com.br/br/pt/home/selecionar-voo?c[0].ds=${orig}&c[0].std=${ida}&c[0].as=${dest}&c[1].ds=${dest}&c[1].std=${voltaFmt}&c[1].as=${orig}&p[0].t=ADT&p[0].c=1`;
+  }
+
+  if (nome.includes('kayak')) {
+    const tipo = volta ? `${orig}-${dest}/${ida}/${dest}-${orig}/${voltaFmt}` : `${orig}-${dest}/${ida}`;
+    return `https://www.kayak.com.br/flights/${tipo}/1adults`;
+  }
+
+  if (nome.includes('skyscanner')) {
+    const tipo = volta ? 'roundtrip' : 'oneway';
+    return `https://www.skyscanner.com.br/passagens-aereas/${orig}/${dest}/${ida}/${voltaFmt}/?adults=1&cabinclass=economy`;
+  }
+
+  if (nome.includes('booking') || nome.includes('hotel')) {
+    const checkIn  = ida;
+    const checkOut = volta || (() => { const d = new Date(ida); d.setDate(d.getDate()+7); return d.toISOString().split('T')[0]; })();
+    return `https://www.booking.com/searchresults.pt-br.html?ss=${dEnc}&checkin=${checkIn}&checkout=${checkOut}&group_adults=1`;
+  }
+
+  if (nome.includes('airbnb')) {
+    const checkIn  = ida;
+    const checkOut = volta || (() => { const d = new Date(ida); d.setDate(d.getDate()+7); return d.toISOString().split('T')[0]; })();
+    return `https://www.airbnb.com.br/s/${dEnc}/homes?checkin=${checkIn}&checkout=${checkOut}&adults=1`;
+  }
+
+  if (nome.includes('trivago') || nome.includes('hoteis') || nome.includes('hotel')) {
+    return `https://www.trivago.com.br/?aDateRange[arr]=${ida}&aDateRange[dep]=${volta || ''}&aPriceRange[from]=0&iRoomType=7&iUnits=2&rcis=1&sQuery=${dEnc}`;
+  }
+
+  // Fallback: Google Flights sempre funciona
+  return `https://www.google.com/travel/flights?q=Flights+from+${oEnc}+to+${dEnc}+on+${ida}`;
+}
+
+// ════════════════════════════════
 // RENDER
 // ════════════════════════════════
 function renderResults(data, origem, destino) {
   document.getElementById('loading-wrap').classList.remove('show');
   document.getElementById('btn-buscar').disabled = false;
+
+  // Pega as datas atuais do formulário para gerar links corretos
+  const ida   = document.getElementById('s-ida').value;
+  const volta = document.getElementById('s-volta').value;
 
   document.getElementById('analysis-box').innerHTML =
     `<strong>Análise:</strong> ${data.analise || 'Resultados encontrados.'}`;
@@ -426,8 +538,10 @@ function renderResults(data, origem, destino) {
       <div class="result-section-title">Passagens — ${origem} → ${destino}</div>`;
     data.passagens.forEach(p => {
       const isBest = p.tipo === 'melhor';
+      // Sempre usa link gerado — nunca o link do Gemini
+      const link = gerarLinksReais(p.site, origem, destino, ida, volta);
       html += `
-        <a class="result-card ${isBest ? 'best' : ''}" href="${p.url || '#'}" target="_blank" rel="noopener noreferrer">
+        <a class="result-card ${isBest ? 'best' : ''}" href="${link}" target="_blank" rel="noopener noreferrer">
           <div>
             ${isBest ? '<span class="rc-badge">✓ Melhor opção</span>' : ''}
             <div class="rc-route">${p.site}</div>
@@ -448,8 +562,9 @@ function renderResults(data, origem, destino) {
     html += `<div class="result-section" style="margin-top:1.5rem">
       <div class="result-section-title">Hospedagem em ${destino}</div>`;
     data.hospedagem.forEach(h => {
+      const link = gerarLinksReais(h.site, origem, destino, ida, volta);
       html += `
-        <a class="result-card" href="${h.url || '#'}" target="_blank" rel="noopener noreferrer">
+        <a class="result-card" href="${link}" target="_blank" rel="noopener noreferrer">
           <div>
             <div class="rc-route">${h.site}</div>
             <div class="rc-details">${h.descricao}</div>
