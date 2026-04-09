@@ -709,3 +709,12 @@ input:focus { border-color: var(--accent2); }
   .hpage-card { grid-template-columns: auto 1fr; }
   .hpage-action { display: none; }
 }
+
+/* ── Aviso de preço estimado ── */
+.rc-disclaimer {
+  font-size: .72rem;
+  color: var(--muted);
+  margin-top: .4rem;
+  font-style: italic;
+  line-height: 1.4;
+}
