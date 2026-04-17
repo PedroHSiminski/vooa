@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 
-<!-- PWA -->
+  <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1a2b4a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -333,6 +333,57 @@
 <script src="js/search.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/main.js"></script>
+
+<script>
+  // Registro do Service Worker (PWA)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .catch((err) => console.error('Service Worker: erro ao registrar', err));
+    });
+  }
+</script>
+
+<!-- Banner de instalação iOS -->
+<div class="ios-install-banner" id="ios-install-banner" style="display:none" role="dialog" aria-label="Instalar Vooa">
+  <div class="ios-banner-icon">✈️</div>
+  <div class="ios-banner-body">
+    <div class="ios-banner-title">Instalar o Vooa</div>
+    <div class="ios-banner-text">
+      Toque em <strong>Compartilhar</strong> <span aria-label="ícone compartilhar">⎙</span>
+      e depois em <strong>"Adicionar à Tela de Início"</strong> para instalar como app.
+    </div>
+  </div>
+  <button class="ios-banner-close" id="ios-banner-close" aria-label="Fechar">✕</button>
+</div>
+
+<script>
+  // Exibe o banner apenas em iOS/Safari, fora do modo standalone
+  (function () {
+    const STORAGE_KEY = 'vooa-ios-banner-dismissed';
+
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isStandalone = window.navigator.standalone === true;
+    const wasDismissed = localStorage.getItem(STORAGE_KEY);
+
+    if (!isIos || !isSafari || isStandalone || wasDismissed) return;
+
+    const banner = document.getElementById('ios-install-banner');
+    const closeBtn = document.getElementById('ios-banner-close');
+
+    // Exibe o banner com pequeno delay para não competir com o carregamento
+    setTimeout(() => {
+      banner.style.display = 'flex';
+    }, 2000);
+
+    closeBtn.addEventListener('click', () => {
+      banner.classList.add('hide');
+      localStorage.setItem(STORAGE_KEY, '1');
+      setTimeout(() => { banner.style.display = 'none'; }, 300);
+    });
+  })();
+</script>
 
 </body>
 </html>
