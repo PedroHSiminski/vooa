@@ -1,8 +1,10 @@
+// ============================================================
 // Vooa — Service Worker
 // Estratégia: cache apenas de arquivos estáticos.
 // Dados do usuário, Supabase e Gemini NUNCA são cacheados.
+// ============================================================
 
-const CACHE_NAME = 'vooa-v1';
+const CACHE_NAME = 'vooa-v2';
 
 // Arquivos estáticos que entram no cache
 const STATIC_ASSETS = [
@@ -11,13 +13,11 @@ const STATIC_ASSETS = [
   '/style.css',
   '/js/main.js',
   '/js/auth.js',
-  '/js/SearchAI.js',
+  '/js/search.js',
   '/js/history.js',
   '/js/render.js',
   '/js/links.js',
   '/assets/favicon.svg',
-  '/assets/icon-192.png',
-  '/assets/icon-512.png',
   '/manifest.json'
 ];
 
@@ -29,19 +29,27 @@ const NEVER_CACHE = [
   '/api/search'         // função serverless Vercel (chave Gemini)
 ];
 
-
+// ============================================================
 // INSTALL — faz cache dos arquivos estáticos
+// ============================================================
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      return Promise.allSettled(
+        STATIC_ASSETS.map((url) =>
+          cache.add(url).catch((err) =>
+            console.warn('SW: não foi possível cachear', url, err)
+          )
+        )
+      );
     })
   );
-  // Ativa imediatamente sem esperar o app ser fechado
   self.skipWaiting();
 });
 
+// ============================================================
 // ACTIVATE — remove caches antigos de versões anteriores
+// ============================================================
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -55,7 +63,9 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// ============================================================
 // FETCH — intercepta requisições
+// ============================================================
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
 
