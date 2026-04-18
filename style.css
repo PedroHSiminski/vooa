@@ -890,6 +890,179 @@ input:focus { border-color: var(--accent2); }
 }
 .share-feedback.show { opacity: 1; }
 
+/* ── Botão instalar app no header ── */
+.btn-install-app {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  background: rgba(192,98,58,.12);
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: .78rem;
+  font-weight: 500;
+  padding: .35rem .8rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.btn-install-app:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ── Modal de instalação ── */
+.install-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,18,32,.55);
+  z-index: 9000;
+  backdrop-filter: blur(2px);
+}
+.install-modal {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--card);
+  border-radius: 24px 24px 0 0;
+  padding: 1.5rem 1.5rem 2.5rem;
+  z-index: 9001;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 -8px 40px rgba(0,0,0,.15);
+  transform: translateY(100%);
+  transition: transform .25s ease;
+}
+.install-modal.open {
+  transform: translateY(0);
+}
+@media(min-width: 520px) {
+  .install-modal {
+    bottom: auto;
+    top: 50%;
+    transform: translateY(calc(-50% + 40px));
+    border-radius: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .install-modal.open {
+    transform: translateY(-50%);
+  }
+}
+
+.install-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.install-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--navy, #1a2b4a);
+}
+.install-modal-close {
+  background: var(--sand);
+  border: none;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+.install-modal-close:hover { background: #d8d0c4; }
+
+.install-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem;
+  background: var(--sand);
+  border-radius: 10px;
+  padding: .25rem;
+}
+.install-tab {
+  padding: .55rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .2s;
+}
+.install-tab.active {
+  background: var(--card);
+  color: var(--navy, #1a2b4a);
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+.install-intro {
+  font-size: .88rem;
+  color: var(--muted);
+  font-weight: 300;
+  line-height: 1.5;
+  margin-bottom: .75rem;
+}
+.install-intro strong { color: var(--navy, #1a2b4a); font-weight: 500; }
+
+.install-steps { display: flex; flex-direction: column; gap: .75rem; }
+
+.install-step {
+  display: flex;
+  align-items: flex-start;
+  gap: .85rem;
+  background: var(--paper);
+  border-radius: 12px;
+  padding: .85rem 1rem;
+}
+.install-step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--navy, #1a2b4a);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.install-step-text {
+  font-size: .88rem;
+  line-height: 1.5;
+  color: var(--ink);
+  padding-top: .2rem;
+}
+.install-step-text strong { color: var(--accent); font-weight: 600; }
+
+.install-icon-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: 4px;
+  background: var(--sand);
+  font-size: .8rem;
+  vertical-align: middle;
+  margin: 0 1px;
+}
+
+.install-final {
+  margin-top: .25rem;
+  text-align: center;
+  font-size: .88rem;
+  font-weight: 500;
+  color: var(--accent2);
+  padding: .75rem;
+  background: #edf3fb;
+  border-radius: 10px;
+}
+
 /* ── Banner de instalação iOS ── */
 .ios-install-banner {
   position: fixed;
