@@ -318,11 +318,27 @@ input:focus { border-color: var(--accent2); }
   box-shadow: 0 8px 40px rgba(0,0,0,.15);
 }
 @media(max-width:768px){
-  .search-card { grid-template-columns: 1fr 1fr; }
+  .search-card {
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+  }
   .search-card .btn-search { grid-column: 1/-1; }
 }
-@media(max-width:480px){
-  .search-card { grid-template-columns: 1fr; }
+@media(max-width:600px){
+  .search-card {
+    grid-template-columns: 1fr;
+    gap: .65rem;
+    padding: 1.25rem;
+  }
+  .search-card .btn-search { grid-column: 1/-1; }
+}
+
+/* Garante que inputs de data não transbordem */
+input[type=date] {
+  width: 100%;
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .search-field label {
