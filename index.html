@@ -210,6 +210,9 @@
   <header class="app-header">
     <div class="header-logo">Vooa</div>
     <div class="header-user">
+      <button class="btn-install-app" id="btn-install-app" onclick="openInstallModal()" style="display:none" aria-label="Instalar app">
+        ⬇ Instalar app
+      </button>
       <div class="user-avatar" id="user-avatar">?</div>
       <span class="user-name user-name-link" id="user-name-display" onclick="showHistoryPage()">—</span>
       <button class="btn-logout" onclick="logout()">Sair</button>
@@ -326,6 +329,59 @@
 
 </div>
 
+<!-- Modal de instalação -->
+<div class="install-modal-overlay" id="install-modal-overlay" onclick="closeInstallModal()" style="display:none"></div>
+<div class="install-modal" id="install-modal" style="display:none" role="dialog" aria-label="Como instalar o Vooa">
+
+  <div class="install-modal-header">
+    <div class="install-modal-title">Instalar o Vooa</div>
+    <button class="install-modal-close" onclick="closeInstallModal()" aria-label="Fechar">✕</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="install-tabs" id="install-tabs">
+    <button class="install-tab active" onclick="switchInstallTab('ios', this)">🍎 iPhone</button>
+    <button class="install-tab" onclick="switchInstallTab('android', this)">🤖 Android</button>
+  </div>
+
+  <!-- iOS -->
+  <div class="install-steps" id="itab-ios">
+    <p class="install-intro">Abra o Vooa no <strong>Safari</strong> e siga os passos:</p>
+    <div class="install-step">
+      <div class="install-step-num">1</div>
+      <div class="install-step-text">Toque no botão <strong>Compartilhar</strong> <span class="install-icon-inline">⎙</span> na barra inferior do Safari</div>
+    </div>
+    <div class="install-step">
+      <div class="install-step-num">2</div>
+      <div class="install-step-text">Role o menu e toque em <strong>"Adicionar à Tela de Início"</strong></div>
+    </div>
+    <div class="install-step">
+      <div class="install-step-num">3</div>
+      <div class="install-step-text">Confirme tocando em <strong>"Adicionar"</strong> no canto superior direito</div>
+    </div>
+    <div class="install-final">✈️ O ícone do Vooa aparecerá na sua tela inicial!</div>
+  </div>
+
+  <!-- Android -->
+  <div class="install-steps" id="itab-android" style="display:none">
+    <p class="install-intro">Abra o Vooa no <strong>Chrome</strong> e siga os passos:</p>
+    <div class="install-step">
+      <div class="install-step-num">1</div>
+      <div class="install-step-text">Toque nos <strong>três pontinhos</strong> <span class="install-icon-inline">⋮</span> no canto superior direito</div>
+    </div>
+    <div class="install-step">
+      <div class="install-step-num">2</div>
+      <div class="install-step-text">Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar aplicativo"</strong></div>
+    </div>
+    <div class="install-step">
+      <div class="install-step-num">3</div>
+      <div class="install-step-text">Confirme tocando em <strong>"Instalar"</strong></div>
+    </div>
+    <div class="install-final">✈️ O ícone do Vooa aparecerá na sua tela inicial!</div>
+  </div>
+
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/links.js"></script>
 <script src="js/render.js"></script>
@@ -383,6 +439,57 @@
       setTimeout(() => { banner.style.display = 'none'; }, 300);
     });
   })();
+</script>
+
+<script>
+  // ── Modal de instalação ──
+  function openInstallModal() {
+    document.getElementById('install-modal-overlay').style.display = 'block';
+    const modal = document.getElementById('install-modal');
+    modal.style.display = 'flex';
+    // Detecta sistema e abre a tab certa
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (!isIos) {
+      const tabs = document.querySelectorAll('.install-tab');
+      switchInstallTab('android', tabs[1]);
+    }
+    // Animação de entrada
+    requestAnimationFrame(() => modal.classList.add('open'));
+  }
+
+  function closeInstallModal() {
+    const modal = document.getElementById('install-modal');
+    modal.classList.remove('open');
+    setTimeout(() => {
+      modal.style.display = 'none';
+      document.getElementById('install-modal-overlay').style.display = 'none';
+    }, 250);
+  }
+
+  function switchInstallTab(tab, btn) {
+    document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('itab-ios').style.display = tab === 'ios' ? 'block' : 'none';
+    document.getElementById('itab-android').style.display = tab === 'android' ? 'block' : 'none';
+  }
+
+  // Mostra botão apenas se não estiver instalado como PWA
+  (function () {
+    const isStandalone = window.navigator.standalone === true ||
+      window.matchMedia('(display-mode: standalone)').matches;
+    if (!isStandalone) {
+      // Aguarda o DOM do app carregar para exibir o botão
+      window.addEventListener('load', () => {
+        const btn = document.getElementById('btn-install-app');
+        if (btn) btn.style.display = 'flex';
+      });
+    }
+  })();
+
+  // Fecha modal com Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeInstallModal();
+  });
 </script>
 
 </body>
