@@ -906,6 +906,23 @@ input[type=date] {
 }
 .share-feedback.show { opacity: 1; }
 
+/* ── Botão permanente "como instalar" ── */
+.btn-how-to-install {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: .3rem .4rem;
+  border-radius: 6px;
+  line-height: 1;
+  transition: background .2s;
+  opacity: .7;
+}
+.btn-how-to-install:hover {
+  background: var(--sand);
+  opacity: 1;
+}
+
 /* ── Botão instalar app no header ── */
 .btn-install-app {
   display: flex;
