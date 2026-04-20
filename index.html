@@ -202,6 +202,45 @@
   </div>
 </div>
 
+  <!-- Recuperação de senha -->
+
+<div id="page-reset-pass" class="page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="assets/favicon.svg" alt="Vooa" />
+      <span>Vooa</span>
+    </div>
+
+    <h2 class="auth-title">Nova senha</h2>
+    <p class="auth-subtitle">Escolha uma senha segura para sua conta.</p>
+
+    <div class="form-group">
+      <label for="reset-pass-new">Nova senha</label>
+      <input
+        type="password"
+        id="reset-pass-new"
+        placeholder="Mínimo 8 caracteres"
+        autocomplete="new-password"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="reset-pass-confirm">Confirmar nova senha</label>
+      <input
+        type="password"
+        id="reset-pass-confirm"
+        placeholder="Repita a nova senha"
+        autocomplete="new-password"
+      />
+    </div>
+
+    <p id="reset-pass-error"   class="msg error"></p>
+    <p id="reset-pass-success" class="msg success"></p>
+
+    <button id="btn-reset-pass" class="btn-primary">Salvar nova senha</button>
+  </div>
+</div>
+
 <!-- ══════════════════════════════
      APP PRINCIPAL
 ══════════════════════════════ -->
