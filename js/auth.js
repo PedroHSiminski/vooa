@@ -107,6 +107,51 @@ async function handleRecover() {
   showMsg('rec-success', `Link enviado para ${email}. Verifique sua caixa de entrada.`);
 }
 
+// ── Redefinição de senha (após clicar no link do e-mail) ──
+async function handleResetPassword() {
+  const pass    = document.getElementById('reset-pass-new').value;
+  const confirm = document.getElementById('reset-pass-confirm').value;
+  hideMsg('reset-pass-error');
+  hideMsg('reset-pass-success');
+
+  if (!pass || !confirm) {
+    showMsg('reset-pass-error', 'Preencha os dois campos.');
+    return;
+  }
+  if (pass.length < 8) {
+    showMsg('reset-pass-error', 'A senha precisa ter ao menos 8 caracteres.');
+    return;
+  }
+  if (pass !== confirm) {
+    showMsg('reset-pass-error', 'As senhas não coincidem.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-reset-pass');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+
+  const { error } = await sb.auth.updateUser({ password: pass });
+
+  btn.disabled = false;
+  btn.textContent = 'Salvar nova senha';
+
+  if (error) {
+    showMsg('reset-pass-error', error.message);
+    return;
+  }
+
+  showMsg('reset-pass-success', 'Senha atualizada! Redirecionando para o login...');
+
+  // Faz logout e redireciona para login após 2s
+  setTimeout(async () => {
+    await sb.auth.signOut();
+    document.getElementById('reset-pass-new').value    = '';
+    document.getElementById('reset-pass-confirm').value = '';
+    showPage('page-login');
+  }, 2000);
+}
+
 // ── Session ──
 function loginSuccess(user, name) {
   const displayName = name || user.user_metadata?.name || user.email.split('@')[0];
