@@ -8,6 +8,30 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 let sb          = null;
 let currentUser = null;
 
+// ── Captura o evento de instalação o mais cedo possível ──
+// Deve ficar FORA do DOMContentLoaded para não perder o evento
+let _installPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _installPrompt = e;
+  // Tenta mostrar o botão imediatamente se o DOM já estiver pronto
+  _tryShowInstallBtn();
+});
+
+function _tryShowInstallBtn() {
+  const btn = document.getElementById('btn-install-app');
+  if (btn && _installPrompt) {
+    btn.style.display = 'flex';
+  }
+}
+
+// Quando o app já está instalado, esconde o botão
+window.addEventListener('appinstalled', () => {
+  _installPrompt = null;
+  const btn = document.getElementById('btn-install-app');
+  if (btn) btn.style.display = 'none';
+});
+
 // ── Navegação ──
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -71,6 +95,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   setDefaultDates();
+
+  // Caso o beforeinstallprompt já tenha disparado antes do DOM estar pronto
+  _tryShowInstallBtn();
 
   // ── Verifica se é um link de redefinição de senha ──
   // Deve ser checado ANTES de getSession, pois o Supabase
